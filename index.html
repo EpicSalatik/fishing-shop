@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рибальський Вузол | Карта та Маркет</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root {
+            --dark: #1a472a;
+            --green: #28a745;
+            --bg: #f0f2f5;
+            --accent: #0088cc;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg);
+            margin: 0;
+            padding-top: 70px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: var(--dark);
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            z-index: 2000;
+        }
+
+            .navbar button {
+                background: none;
+                border: 1px solid rgba(255,255,255,0.4);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 25px;
+                cursor: pointer;
+            }
+
+                .navbar button.active {
+                    background: var(--green);
+                    border-color: var(--green);
+                    font-weight: bold;
+                }
+
+        .hero {
+            width: 100%;
+            height: 180px;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .hero-track {
+            display: flex;
+            width: 300%;
+            height: 100%;
+            animation: slide 20s infinite linear;
+        }
+
+            .hero-track img {
+                width: 33.33%;
+                height: 100%;
+                object-fit: cover;
+                opacity: 0.5;
+            }
+
+        @keyframes slide {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-66.6%);
+            }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .section {
+            display: none;
+        }
+
+            .section.active {
+                display: block;
+            }
+
+        #map-main, #map-picker {
+            height: 450px;
+            width: 100%;
+            border-radius: 15px;
+            border: 2px solid var(--dark);
+            margin-top: 10px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 20px;
+        }
+
+        .p-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <button onclick="tab('market')" id="btn-market" class="active">🛒 Маркет</button>
+        <button onclick="tab('map-sec')" id="btn-map-sec">📍 Жива Карта</button>
+        <button onclick="tab('sell')" id="btn-sell">➕ Додати</button>
+    </div>
+
+    <div id="hero-block" class="hero">
+        <div class="hero-track">
+            <img src="https://images.unsplash.com/photo-1544551763-47a0159f9234?w=800">
+            <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800">
+            <img src="https://images.unsplash.com/photo-1499678329028-101435549a4e?w=800">
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="market" class="section active">
+            <select id="f-cat" onchange="loadProducts()"><option value="Всі">Всі товари</option></select>
+            <div id="product-list" class="grid"></div>
+        </div>
+
+        <div id="map-sec" class="section">
+            <div class="card"><h3>📍 Мапа водойм</h3><div id="map-main"></div></div>
+        </div>
+
+        <div id="sell" class="section">
+            <div class="card">
+                <h3>📍 Додати точку</h3>
+                <select id="s_type"><option value="free">🍀 Безкоштовно</option><option value="paid">💰 Платник</option></select>
+                <input type="text" id="s_name" placeholder="Назва">
+                <textarea id="s_desc" placeholder="Опис"></textarea>
+                <div style="display:flex; gap:10px;">
+                    <input type="number" id="s_lat" placeholder="Широта" readonly>
+                    <input type="number" id="s_lng" placeholder="Довгота" readonly>
+                </div>
+                <div id="map-picker" style="height:250px;"></div>
+                <button class="btn" onclick="saveSpot()" style="margin-top:10px;">Зберегти</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
